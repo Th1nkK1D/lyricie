@@ -4,7 +4,10 @@
       <div class="title">Riff-Off Bot</div>
       <div class="cardbox">
         <div class="chat">
-          chat here
+          <div class="msg">
+            <Message text="Look at the srats, look how they shine for you" :isUser="true" />
+            <Message text="Look at the srats, look how they shine for you" />
+          </div>
         </div>
         <div class="form">
           <input type="text" />
@@ -19,8 +22,13 @@
 </template>
 
 <script>
+import Message from './components/Message'
+
 export default {
   name: 'app',
+  components: {
+    Message
+  }
 }
 </script>
 
