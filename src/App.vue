@@ -4,9 +4,8 @@
       <div class="title">Riff-Off Bot</div>
       <div class="cardbox">
         <div class="chat">
-          <div class="msg">
-            <Message text="Look at the srats, look how they shine for you" :isUser="true" />
-            <Message text="Look at the srats, look how they shine for you" />
+          <div v-for="(msg, m) in conversation" :key="m" :class="{'msg': true , 'bot': !msg.isUser }">
+            <Message :text="msg.text" :isUser="msg.isUser" />
           </div>
         </div>
         <div class="form">
@@ -28,6 +27,14 @@ export default {
   name: 'app',
   components: {
     Message
+  },
+  data () {
+    return {
+      conversation: [
+        { isUser: true, text: 'Look at the srats, look how they shine for you' },
+        { isUser: false, text: 'If you love me, why you leave me' }
+      ]
+    }
   }
 }
 </script>
@@ -84,8 +91,18 @@ body {
 
 .chat {
   display: flex;
+  flex-direction: column;
   flex: 1;
   overflow-y: scroll;
+
+  .msg {
+    display: flex;
+    padding-bottom: 0.5rem;
+
+    &.bot {
+      justify-content: flex-end;
+    }
+  }
 }
 
 .form {

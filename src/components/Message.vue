@@ -3,7 +3,7 @@
     backgroundColor: isUser ? '#8EC5FC' : '#E0C3FC',
     borderRadius: isUser ? '8px 8px 8px 0' : '8px 0 8px 8px'
   }">
-    {{ text }} ({{ isUser ? 'user' : 'bot'}})
+    {{ text }}
   </div>
 </template>
 
