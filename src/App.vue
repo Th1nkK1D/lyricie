@@ -9,11 +9,18 @@
           </div>
         </div>
         <div v-else class="tip">
-          <p>Tell me something, I will sing you some sh*t <br><br> ヾ(⌐■_■)ノ♪</p>
+          <p>Tell me something, I will sing you some riff! <br><br> ヾ(⌐■_■)ノ♪</p>
         </div>
         <div class="form">
           <input type="text" v-model="inputLyric" autofocus/>
-          <button type="submit" @click="submit">Send</button>
+          <button type="submit" @click="submit" :style="{ opacity: isLoading ? 0.5 : 1 }">
+            <div v-if="!isLoading">Send</div>
+            <div v-else class="spinner">
+              <div class="bounce1"></div>
+              <div class="bounce2"></div>
+              <div class="bounce3"></div>
+            </div>
+          </button>
         </div>
       </div>
       <div class="footer">
@@ -38,12 +45,13 @@ export default {
   data () {
     return {
       inputLyric: '',
-      conversation: []
+      conversation: [],
+      isLoading: false
     }
   },
   methods: {
     submit () {
-      if (this.inputLyric.length > 0) {
+      if (!this.isLoading && this.inputLyric.length > 0) {
         this.pushMessage({
           isUser: true,
           text: this.inputLyric
@@ -53,19 +61,20 @@ export default {
         const keyword = splittedInput[splittedInput.length - 1].toLowerCase()
 
         this.inputLyric = ''
+        this.isLoading = true
 
-        axios.get(BASE_API_URL + '/track.search?apikey=' + MX_API_KEY + '&q_lyrics=' + keyword + '&page_size=5&f_lyrics_language=en&f_has_lyrics=1', { crossdomain: true }).then(
+        axios.get(BASE_API_URL + '/track.search?apikey=' + MX_API_KEY + '&q_lyrics=' + keyword + '&page_size=5&f_lyrics_language=en&f_has_lyrics=1').then(
           res => {
             if (res.data.message.body.track_list.length > 0) {
               const track = res.data.message.body.track_list[parseInt(Math.random() * res.data.message.body.track_list.length)].track
 
-              axios.get(BASE_API_URL + '/track.lyrics.get?apikey=' + MX_API_KEY + '&track_id=' + track.track_id, { crossdomain: true }).then(
+              axios.get(BASE_API_URL + '/track.lyrics.get?apikey=' + MX_API_KEY + '&track_id=' + track.track_id).then(
                 res => {
                   const lyrics = res.data.message.body.lyrics.lyrics_body.split('\n')
 
                   const replyMsg = lyrics.find(s => s.toLowerCase().indexOf(keyword) > -1)
 
-                  if (replyMsg.length > 0) {
+                  if (replyMsg && replyMsg.length > 0) {
                     this.pushMessage({
                       isUser: false,
                       text: replyMsg,
@@ -77,6 +86,8 @@ export default {
                       text: '¯\\_(ツ)_/¯'
                     })
                   }
+
+                  this.isLoading = false
                 }
               )
             } else {
@@ -84,6 +95,8 @@ export default {
                 isUser: false,
                 text: '¯\\_(ツ)_/¯'
               })
+
+              this.isLoading = false
             }
           }
         )
@@ -93,7 +106,7 @@ export default {
       this.conversation.push(msg)
 
       if (this.$refs.chat) {
-        this.$refs.chat.scrollTop = this.$refs.chat.clientHeight + 40
+        this.$refs.chat.scrollTop = this.$refs.chat.clientHeight
       }
     }
   }
@@ -210,4 +223,46 @@ body {
     }
   }
 }
+
+.spinner {
+  transform: scale(0.5);
+  text-align: center;
+}
+
+.spinner > div {
+  width: 18px;
+  height: 18px;
+  background-color: white;
+
+  border-radius: 100%;
+  display: inline-block;
+  -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+  animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+}
+
+.spinner .bounce1 {
+  -webkit-animation-delay: -0.32s;
+  animation-delay: -0.32s;
+}
+
+.spinner .bounce2 {
+  -webkit-animation-delay: -0.16s;
+  animation-delay: -0.16s;
+}
+
+@-webkit-keyframes sk-bouncedelay {
+  0%, 80%, 100% { -webkit-transform: scale(0) }
+  40% { -webkit-transform: scale(1.0) }
+}
+
+@keyframes sk-bouncedelay {
+  0%, 80%, 100% {
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  } 40% {
+    -webkit-transform: scale(1.0);
+    transform: scale(1.0);
+  }
+}
+
 </style>

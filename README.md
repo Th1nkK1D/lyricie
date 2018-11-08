@@ -1,4 +1,8 @@
-# riffoff-bot
+# Lyricie
+
+Non-useful and time-wasting chat bot powered by musiXmatch
+
+``` Tell me something, I will sing you some riff ヾ(⌐■_■)ノ♪ ```
 
 ## Project setup
 ```
