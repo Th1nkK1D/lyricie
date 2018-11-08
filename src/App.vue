@@ -3,10 +3,13 @@
     <div class="container">
       <div class="title">Lyricie ♪</div>
       <div class="cardbox">
-        <div class="chat">
+        <div v-if="conversation.length > 0" class="chat" ref="chat">
           <div v-for="(msg, m) in conversation" :key="m" :class="{'msg': true , 'bot': !msg.isUser }">
             <Message :text="msg.text" :subtext="msg.subtext || ''" :isUser="msg.isUser" />
           </div>
+        </div>
+        <div v-else class="tip">
+          <p>Tell me something, I will sing you some sh*t <br><br> ヾ(⌐■_■)ノ♪</p>
         </div>
         <div class="form">
           <input type="text" v-model="inputLyric" autofocus/>
@@ -14,7 +17,7 @@
         </div>
       </div>
       <div class="footer">
-        Lyrics powered by musiXmatch - Developed by Th1nkK1D 2018 - View on Github
+        Lyrics powered by <a href="https://developer.musixmatch.com" target="_blank">musiXmatch</a> - Developed by <a href="https://th1nkk1d.github.io" target="_blank">Th1nkK1D</a> 2018 - View on <a href="https://github.com/Th1nkK1D/lyricie">Github</a>
       </div>
     </div>
   </div>
@@ -41,7 +44,7 @@ export default {
   methods: {
     submit () {
       if (this.inputLyric.length > 0) {
-        this.conversation.push({
+        this.pushMessage({
           isUser: true,
           text: this.inputLyric
         })
@@ -61,15 +64,29 @@ export default {
 
                 const replyMsg = lyrics.find(s => s.toLowerCase().indexOf(keyword) > -1)
 
-                this.conversation.push({
-                  isUser: false,
-                  text: replyMsg,
-                  subtext: track.artist_name + ' - ' + track.track_name
+                if (replyMsg.length > 0) {
+                  this.pushMessage({
+                    isUser: false,
+                    text: replyMsg,
+                    subtext: track.artist_name + ' - ' + track.track_name
                 })
+                } else {
+                  this.pushMessage({
+                    isUser: false,
+                    text: '¯\_(ツ)_/¯'
+                  })
+                }
               }
             )
           }
         )
+      }
+    },
+    pushMessage (msg) {
+      this.conversation.push(msg)
+
+      if (this.$refs.chat) {
+        this.$refs.chat.scrollTop = this.$refs.chat.clientHeight + 40;
       }
     }
   }
@@ -104,6 +121,10 @@ body {
   color: white;
   text-align: center;
   margin-top: 1rem;
+
+  a {
+    color: white;
+  }
 }
 
 .container {
@@ -127,8 +148,6 @@ body {
 }
 
 .chat {
-  display: flex;
-  flex-direction: column;
   flex: 1;
   overflow-y: scroll;
 
@@ -139,6 +158,18 @@ body {
     &.bot {
       justify-content: flex-end;
     }
+  }
+}
+
+.tip {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+
+  p {
+    margin: auto;
+    text-align: center;
+    color: gray;
   }
 }
 

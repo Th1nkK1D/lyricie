@@ -20,11 +20,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
   .message {
     padding: 0.5rem;
     border-radius: 8px 8px 8px 0;
     background-color: #8EC5FC;
     color: white;
+    margin: 0 0 0 auto;
   }
 
   .subtext {
