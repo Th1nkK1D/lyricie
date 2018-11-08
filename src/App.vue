@@ -56,28 +56,35 @@ export default {
 
         axios.get(BASE_API_URL + '/track.search?apikey=' + MX_API_KEY + '&q_lyrics=' + keyword + '&page_size=5&f_lyrics_language=en&f_has_lyrics=1', { crossdomain: true }).then(
           res => {
-            const track = res.data.message.body.track_list[parseInt(Math.random() * res.data.message.body.track_list.length)].track
+            if (res.data.message.body.track_list.length > 0) {
+              const track = res.data.message.body.track_list[parseInt(Math.random() * res.data.message.body.track_list.length)].track
 
-            axios.get(BASE_API_URL + '/track.lyrics.get?apikey=' + MX_API_KEY + '&track_id=' + track.track_id, { crossdomain: true }).then(
-              res => {
-                const lyrics = res.data.message.body.lyrics.lyrics_body.split('\n')
+              axios.get(BASE_API_URL + '/track.lyrics.get?apikey=' + MX_API_KEY + '&track_id=' + track.track_id, { crossdomain: true }).then(
+                res => {
+                  const lyrics = res.data.message.body.lyrics.lyrics_body.split('\n')
 
-                const replyMsg = lyrics.find(s => s.toLowerCase().indexOf(keyword) > -1)
+                  const replyMsg = lyrics.find(s => s.toLowerCase().indexOf(keyword) > -1)
 
-                if (replyMsg.length > 0) {
-                  this.pushMessage({
-                    isUser: false,
-                    text: replyMsg,
-                    subtext: track.artist_name + ' - ' + track.track_name
-                })
-                } else {
-                  this.pushMessage({
-                    isUser: false,
-                    text: '¯\_(ツ)_/¯'
-                  })
+                  if (replyMsg.length > 0) {
+                    this.pushMessage({
+                      isUser: false,
+                      text: replyMsg,
+                      subtext: track.artist_name + ' - ' + track.track_name
+                    })
+                  } else {
+                    this.pushMessage({
+                      isUser: false,
+                      text: '¯\\_(ツ)_/¯'
+                    })
+                  }
                 }
-              }
-            )
+              )
+            } else {
+              this.pushMessage({
+                isUser: false,
+                text: '¯\\_(ツ)_/¯'
+              })
+            }
           }
         )
       }
@@ -86,7 +93,7 @@ export default {
       this.conversation.push(msg)
 
       if (this.$refs.chat) {
-        this.$refs.chat.scrollTop = this.$refs.chat.clientHeight + 40;
+        this.$refs.chat.scrollTop = this.$refs.chat.clientHeight + 40
       }
     }
   }
