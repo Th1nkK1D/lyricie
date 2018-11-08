@@ -1,11 +1,11 @@
 <template>
   <div id="app">
     <div class="container">
-      <div class="title">Riff-Off Bot</div>
+      <div class="title">Lyricie ♪</div>
       <div class="cardbox">
         <div class="chat">
           <div v-for="(msg, m) in conversation" :key="m" :class="{'msg': true , 'bot': !msg.isUser }">
-            <Message :text="msg.text" :isUser="msg.isUser" />
+            <Message :text="msg.text" :subtext="msg.subtext || ''" :isUser="msg.isUser" />
           </div>
         </div>
         <div class="form">
@@ -51,27 +51,20 @@ export default {
 
         this.inputLyric = ''
 
-        console.log(keyword)
-
         axios.get(BASE_API_URL + '/track.search?apikey=' + MX_API_KEY + '&q_lyrics=' + keyword + '&page_size=5&f_lyrics_language=en&f_has_lyrics=1', { crossdomain: true }).then(
           res => {
-            const tracks = res.data.message.body.track_list.map(t => t.track)
-            console.log(tracks)
+            const track = res.data.message.body.track_list[parseInt(Math.random() * res.data.message.body.track_list.length)].track
 
-            const randIndex = parseInt(Math.random() * tracks.length)
-            console.log(randIndex)
-
-            axios.get(BASE_API_URL + '/track.lyrics.get?apikey=' + MX_API_KEY + '&track_id=' + tracks[randIndex].track_id, { crossdomain: true }).then(
+            axios.get(BASE_API_URL + '/track.lyrics.get?apikey=' + MX_API_KEY + '&track_id=' + track.track_id, { crossdomain: true }).then(
               res => {
                 const lyrics = res.data.message.body.lyrics.lyrics_body.split('\n')
-                console.log(lyrics)
 
-                const replyMsg = lyrics.find(s => s.indexOf(keyword) > -1)
-                console.log(replyMsg)
+                const replyMsg = lyrics.find(s => s.toLowerCase().indexOf(keyword) > -1)
 
                 this.conversation.push({
                   isUser: false,
-                  text: replyMsg
+                  text: replyMsg,
+                  subtext: track.artist_name + ' - ' + track.track_name
                 })
               }
             )
