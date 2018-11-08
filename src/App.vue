@@ -9,8 +9,8 @@
           </div>
         </div>
         <div class="form">
-          <input type="text" />
-          <button>Sing!</button>
+          <input type="text" v-model="inputLyric" autofocus/>
+          <button type="submit" @click="submit">Send</button>
         </div>
       </div>
       <div class="footer">
@@ -22,6 +22,10 @@
 
 <script>
 import Message from './components/Message'
+import axios from 'axios'
+
+const MX_API_KEY = '74d2315f07802f305be12ca8705e0b1a'
+const BASE_API_URL = 'https://cors.io/?https://api.musixmatch.com/ws/1.1'
 
 export default {
   name: 'app',
@@ -30,10 +34,50 @@ export default {
   },
   data () {
     return {
-      conversation: [
-        { isUser: true, text: 'Look at the srats, look how they shine for you' },
-        { isUser: false, text: 'If you love me, why you leave me' }
-      ]
+      inputLyric: '',
+      conversation: []
+    }
+  },
+  methods: {
+    submit () {
+      if (this.inputLyric.length > 0) {
+        this.conversation.push({
+          isUser: true,
+          text: this.inputLyric
+        })
+
+        const splittedInput = this.inputLyric.split(' ')
+        const keyword = splittedInput[splittedInput.length - 1].toLowerCase()
+
+        this.inputLyric = ''
+
+        console.log(keyword)
+
+        axios.get(BASE_API_URL + '/track.search?apikey=' + MX_API_KEY + '&q_lyrics=' + keyword + '&page_size=5&f_lyrics_language=en&f_has_lyrics=1', { crossdomain: true }).then(
+          res => {
+            const tracks = res.data.message.body.track_list.map(t => t.track)
+            console.log(tracks)
+
+            const randIndex = parseInt(Math.random() * tracks.length)
+            console.log(randIndex)
+
+            axios.get(BASE_API_URL + '/track.lyrics.get?apikey=' + MX_API_KEY + '&track_id=' + tracks[randIndex].track_id, { crossdomain: true }).then(
+              res => {
+                const lyrics = res.data.message.body.lyrics.lyrics_body.split('\n')
+                console.log(lyrics)
+
+                const replyMsg = lyrics.find(s => s.indexOf(keyword) > -1)
+                console.log(replyMsg)
+
+                this.conversation.push({
+                  isUser: false,
+                  text: replyMsg
+                })
+              }
+            )
+          }
+        )
+      }
     }
   }
 }
@@ -129,6 +173,10 @@ body {
     color: white;
     border: none;
     border-radius: 0 8px 8px 0;
+
+    &:focus {
+      outline-width: 0;
+    }
   }
 }
 </style>
