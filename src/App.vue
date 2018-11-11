@@ -3,7 +3,7 @@
     <div class="container">
       <div class="title">Lyricie ♪</div>
       <div class="cardbox">
-        <div v-if="conversation.length > 0" class="chat" ref="chat">
+        <div v-if="conversation.length > 0" class="chat" v-chat-scroll>
           <div v-for="(msg, m) in conversation" :key="m" :class="{'msg': true , 'bot': !msg.isUser }">
             <Message :text="msg.text" :subtext="msg.subtext || ''" :isUser="msg.isUser" />
           </div>
@@ -12,7 +12,7 @@
           <p>Tell me something, I will sing you some riff! <br><br> ヾ(⌐■_■)ノ♪</p>
         </div>
         <div class="form">
-          <input type="text" v-model="inputLyric" autofocus/>
+          <input type="text" v-model="inputLyric" @keyup.enter="submit" autofocus/>
           <button type="submit" @click="submit" :style="{ opacity: isLoading ? 0.5 : 1 }">
             <div v-if="!isLoading">Send</div>
             <div v-else class="spinner">
@@ -52,7 +52,7 @@ export default {
   methods: {
     submit () {
       if (!this.isLoading && this.inputLyric.length > 0) {
-        this.pushMessage({
+        this.conversation.push({
           isUser: true,
           text: this.inputLyric
         })
@@ -75,13 +75,13 @@ export default {
                   const replyMsg = lyrics.find(s => s.toLowerCase().indexOf(keyword) > -1)
 
                   if (replyMsg && replyMsg.length > 0) {
-                    this.pushMessage({
+                    this.conversation.push({
                       isUser: false,
                       text: replyMsg,
                       subtext: track.artist_name + ' - ' + track.track_name
                     })
                   } else {
-                    this.pushMessage({
+                    this.conversation.push({
                       isUser: false,
                       text: '¯\\_(ツ)_/¯'
                     })
@@ -91,7 +91,7 @@ export default {
                 }
               )
             } else {
-              this.pushMessage({
+              this.conversation.push({
                 isUser: false,
                 text: '¯\\_(ツ)_/¯'
               })
@@ -101,19 +101,15 @@ export default {
           }
         )
       }
-    },
-    pushMessage (msg) {
-      this.conversation.push(msg)
-
-      if (this.$refs.chat) {
-        this.$refs.chat.scrollTop = this.$refs.chat.clientHeight
-      }
     }
   }
 }
 </script>
 
 <style lang="scss">
+
+$break-small: 450px;
+
 body {
   margin: 0;
   padding: 0;
@@ -141,6 +137,7 @@ body {
   color: white;
   text-align: center;
   margin-top: 1rem;
+  font-size: 0.8rem;
 
   a {
     color: white;
@@ -154,6 +151,10 @@ body {
   margin: auto;
   display: flex;
   flex-direction: column;
+
+  @media screen and (max-width: $break-small) {
+    height: 95vh;
+  }
 }
 
 .cardbox {
@@ -165,6 +166,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   padding: 0.5rem;
+  margin: 0 10px;
 }
 
 .chat {
